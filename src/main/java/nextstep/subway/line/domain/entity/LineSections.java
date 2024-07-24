@@ -14,7 +14,9 @@ import lombok.NoArgsConstructor;
 import nextstep.subway.common.exception.SubwayException;
 import nextstep.subway.common.exception.SubwayExceptionType;
 import nextstep.subway.line.exception.InvalidDownStationException;
+import nextstep.subway.line.exception.InvalidSectionLengthException;
 import nextstep.subway.line.exception.InvalidUpStationException;
+import nextstep.subway.line.exception.SectionAlreadyExistsException;
 import nextstep.subway.station.domain.Station;
 
 @Embeddable
@@ -26,50 +28,127 @@ public class LineSections {
     private final List<LineSection> lineSections = new ArrayList<>();
 
     public void addSection(LineSection lineSection) {
+        if(lineSections.isEmpty()) {
+            lineSections.add(lineSection);
+            return;
+        }
 
-        validateUpStation(lineSection.getUpStation());
-        validateDownStation(lineSection.getDownStation());
+        Station newUpStation = lineSection.getUpStation();
+        Station newDownStation = lineSection.getDownStation();
 
-        lineSections.add(lineSection);
+        validateNewLineSection(lineSection, newUpStation, newDownStation);
+
+        if (!isContainUpStations(newUpStation) && isSameAsFirstUpStation(newDownStation)) {
+            lineSections.add(0, lineSection);
+            return;
+        }
+        if (isSameAsLastDownStation(newUpStation)) {
+            lineSections.add(lineSection);
+            return;
+        }
+
+        addLineSectionInMiddle(lineSection, newUpStation, newDownStation);
     }
 
     public void deleteSection(Station station) {
         if(lineSections.size() <= 1) {
             throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_SINGLE_SECTION);
         }
-        if(isDifferentFromLastDownStation(station)) {
+        if(!isSameAsLastDownStation(station)) {
             throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_NON_LAST_DOWN_STATION);
         }
         lineSections.remove(lineSections.size() - 1);
     }
 
-    private void validateUpStation(Station upStation) {
-        if (isDifferentFromLastDownStation(upStation)) {
-            throw new InvalidUpStationException(upStation.getId());
+    private void validateNewLineSection(LineSection lineSection, Station newUpStation, Station newDownStation) {
+        // 상행역은 기존 노선 존재하지 않고, 하행역이 상행 종착역이 아닌 경우
+        if(!isContainStations(newUpStation) && !isSameAsFirstUpStation(newDownStation)) {
+            throw new InvalidDownStationException(newDownStation.getId());
+        }
+
+        // 새로운 노선이 기존 노선에 이미 존재하는 경우
+        if(isSameStation(newUpStation, newDownStation)) {
+            throw new SectionAlreadyExistsException(newUpStation.getId(), newDownStation.getId());
+        }
+
+        // 상행역이 기존 상행역에 존재하고, 하행역이 기존역에 존재하는 경우
+        if(isContainUpStations(newUpStation) && isContainStations(newDownStation)) {
+            throw new InvalidDownStationException(lineSection.getDistance());
+        }
+
+        // 상행역이 기존 상행역에 존재하고, 하행역이 기존 하행역보다 길거나 같은 경우
+        if(isContainUpStations(newUpStation) && isLongerThanExistingSection(lineSection)) {
+            throw new InvalidSectionLengthException(lineSection.getDistance());
         }
     }
 
-    private boolean isDifferentFromLastDownStation(Station station) {
+    private void addLineSectionInMiddle(LineSection lineSection, Station newUpStation, Station newDownStation) {
+        for (int i = 0; i < lineSections.size(); i++) {
+            LineSection currentSection = lineSections.get(i);
+            if(currentSection.getUpStation().equals(newUpStation)) {
+                LineSection newDownSection = new LineSection(
+                    currentSection.getLine(),
+                    newDownStation,
+                    currentSection.getDownStation(),
+                    currentSection.getDistance() - lineSection.getDistance()
+                );
+                lineSections.add(i + 1, lineSection);
+                lineSections.add(i + 2, newDownSection);
+                lineSections.remove(currentSection);
+                return;
+            }
+        }
+
+        throw new InvalidUpStationException(newUpStation.getId());
+    }
+
+    private boolean isLongerThanExistingSection(LineSection newSection) {
+        for (LineSection section : lineSections) {
+            if (section.getUpStation().equals(newSection.getUpStation()) &&
+                newSection.getDistance() >= section.getDistance()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isSameStation(Station upStation, Station downStation) {
+        return lineSections.stream()
+            .anyMatch(section -> section.getUpStation().equals(upStation) && section.getDownStation().equals(downStation));
+    }
+
+    private boolean isSameAsFirstUpStation(Station downStation) {
+        Optional<Station> firstUpStation = getFirstUpStation();
+        return firstUpStation.isPresent() && downStation.equals(firstUpStation.get());
+    }
+
+    private boolean isSameAsLastDownStation(Station upStation) {
         Optional<Station> lastDownStation = getLastDownStation();
-        return lastDownStation.isPresent() && !lastDownStation.get().equals(station);
+        return lastDownStation.isPresent() && upStation.equals(lastDownStation.get());
+    }
+
+    private Optional<Station> getFirstUpStation() {
+        Optional<LineSection> firstSection =
+            lineSections.isEmpty() ? Optional.empty() : Optional.of(lineSections.get(0));
+        return firstSection.map(LineSection::getUpStation);
     }
 
     private Optional<Station> getLastDownStation() {
-        Optional<LineSection> lastSection = getLastLineSection();
+        Optional<LineSection> lastSection = lineSections.isEmpty() ? Optional.empty()
+            : Optional.of(lineSections.get(lineSections.size() - 1));
         return lastSection.map(LineSection::getDownStation);
     }
 
-    private Optional<LineSection> getLastLineSection() {
-        return lineSections.isEmpty() ? Optional.empty() : Optional.of(lineSections.get(lineSections.size() - 1));
+    private boolean isContainStations(Station compareStation) {
+        return getStations().stream()
+            .anyMatch(station -> station.equals(compareStation));
     }
-
-    private void validateDownStation(Station downStation) {
-        if (getStations().stream()
-            .anyMatch(station -> station.equals(downStation))) {
-            throw new InvalidDownStationException(downStation.getId());
-        }
+    private boolean isContainUpStations(Station compareStation) {
+        return lineSections.stream()
+            .map(LineSection::getUpStation)
+            .collect(Collectors.toList()).stream()
+            .anyMatch(station -> station.equals(compareStation));
     }
-
     public List<Station> getStations() {
         return lineSections.stream()
             .flatMap(lineSection -> Stream.of(
@@ -78,7 +157,6 @@ public class LineSections {
             .distinct()
             .collect(Collectors.toList());
     }
-
     public int size() {
         return lineSections.size();
     }

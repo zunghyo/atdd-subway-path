@@ -13,6 +13,8 @@ public enum SubwayExceptionType {
 
     INVALID_UP_STATION("400","Invalid Up Station. upStationId: %s"),
     INVALID_DOWN_STATION("400","Invalid Down Station. downStationId: %s"),
+    SECTION_ALREADY_EXISTS("400","Section is already existed. upStationId: %s, downStationId: %s"),
+    INVALID_SECTION_LENGTH("400","Invalid Section Length. distance: %s"),
 
     CANNOT_DELETE_SINGLE_SECTION("400", "Cannot Delete Single Section"),
     CANNOT_DELETE_NON_LAST_DOWN_STATION("400", "Cannot Delete Non-Last Down Station");

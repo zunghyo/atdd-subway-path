@@ -14,6 +14,7 @@ import io.restassured.response.Response;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,17 +34,18 @@ public class LineSectionAcceptanceTest {
         stationIds.put("신사역", 지하철역_생성_후_id_추출("신사역"));
         stationIds.put("논현역", 지하철역_생성_후_id_추출("논현역"));
         stationIds.put("신논현역", 지하철역_생성_후_id_추출("신논현역"));
+        stationIds.put("강남역", 지하철역_생성_후_id_추출("강남역"));
         stationIds.put("역삼역", 지하철역_생성_후_id_추출("역삼역"));
     }
 
     /**
      * Given 지하철 노선이 주어지고
-     * When 새로운 구간을 등록하면
+     * When 하행 종착역에 새로운 구간을 등록하면
      * Then 구간이 등록된다.
      */
-    @DisplayName("새로운 구간을 생성한다.")
+    @DisplayName("하행 종착역에 새로운 구간을 생성한다.")
     @Test
-    void createSection() {
+    void createSection1() {
         //given
         ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -55,15 +57,55 @@ public class LineSectionAcceptanceTest {
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-
     }
 
     /**
      * Given 지하철 노선이 주어지고
-     * When 새로운 구간을 생성할 때 새로운 구간의 상행역은 노선에 등록되어 있는 하행 종점역이 아니면
+     * When 상행종착역에 새로운 구간을 등록하면
+     * Then 구간이 등록된다.
+     */
+    @DisplayName("상행 종착역에 새로운 구간을 생성한다.")
+    @Test
+    void createSection2() {
+        //given
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("논현역"), 지하철역_id("신논현역"), 10L);
+        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+
+        Long 생성된노선_id = responseToId(신분당선_생성_응답);
+
+        // when
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+
+        // then
+        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+    }
+
+    /**
+     * Given 지하철 노선이 주어지고
+     * When 지하철 노선 가운데 새로운 구간을 등록하면
+     * Then 구간이 등록된다.
+     */
+    @DisplayName("지하철 노선 가운데 새로운 구간을 생성한다.")
+    @Test
+    void createSection3() {
+        //given
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        Long 생성된노선_id = responseToId(신분당선_생성_응답);
+
+        // when
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("신사역"), 지하철역_id("신논현역"), 5L);
+
+        // then
+        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+    }
+
+    /**
+     * Given 지하철 노선이 주어지고
+     * When 새로운 구간을 생성할 때 새로운 구간의 상행역이 노선에 등록되어 있지 않고 하행역이 상행 종착역이 아니면
      * Then 예외가 발생한다.
      */
-    @DisplayName("새로운 구간의 상행역이 노선에 등록되어 있는 하행 종점이 아니면 예외가 발생한다.")
+    @DisplayName("새로운 구간의 상행역이 노선에 등록되어 있지 않고 하행역이 상행 종착역이 아니면 예외가 발생한다.")
     @Test
     void createSectionException() {
         //given
@@ -73,7 +115,7 @@ public class LineSectionAcceptanceTest {
         Long 생성된노선_id = responseToId(신분당선_생성_응답);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("역삼역"), 지하철역_id("신논현역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("신논현역"), 지하철역_id("강남역"), 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -82,24 +124,63 @@ public class LineSectionAcceptanceTest {
 
     /**
      * Given 지하철 노선이 주어지고
-     * When 새로운 구간을 생성할 때 새로운 구간의 하행역이 이미 노선에 등록되어 있으면
+     * When 새로운 구간을 생성할 때 새로운 구간이 이미 등록되어 있으면
      * Then 예외가 발생한다.
      */
-    @DisplayName("새로운 구간의 하행역이 이미 노선에 등록되어 있으면 예외가 발생한다.")
+    @DisplayName("새로운 구간이 이미 등록되어 있으면 예외가 발생한다.")
     @Test
-    void createSectionException2() {
-        //given
+    void createSectionException4() {
         ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         Long 생성된노선_id = responseToId(신분당선_생성_응답);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("논현역"), 지하철역_id("신사역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
 
+    /**
+     * Given 지하철 노선이 주어지고
+     * When 새로운 구간을 생성할 때 새로운 구간의 상행역이 기존 상행역에 존재하고, 하행역도 기존 노선에 존재하면
+     * Then 예외가 발생한다.
+     */
+    @DisplayName("새로운 구간의 상행역이 기존 상행역에 존재하고, 하행역도 기존 노선에 존재하면 예외가 발생한다.")
+    @Test
+    void createSectionException6() {
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        Long 생성된노선_id = responseToId(신분당선_생성_응답);
+        지하철구간_생성(생성된노선_id, 지하철역_id("논현역"), 지하철역_id("강남역"), 5L);
+
+
+        // when
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("논현역"), 지하철역_id("신사역"), 5L);
+
+        // then
+        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
+    }
+
+    /**
+     * Given 지하철 노선이 주어지고
+     * When 새로운 구간을 생성할 때 새로운 구간의 길이가 기존 구간보다 길거나 같으면
+     * Then 예외가 발생한다.
+     */
+    @DisplayName("새로운 구간의 길이가 기존 구간보다 길거나 같으면 예외가 발생한다.")
+    @Test
+    void createSectionException5() {
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("신논현역"), 10L);
+        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+
+        Long 생성된노선_id = responseToId(신분당선_생성_응답);
+
+        // when
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(생성된노선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 20L);
+
+        // then
+        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
     }
 
     /**
