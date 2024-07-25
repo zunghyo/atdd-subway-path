@@ -2,23 +2,24 @@ package nextstep.subway.common.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
 @Getter
 public enum SubwayExceptionType {
 
-    INTERNAL_SERVER_ERROR("500", "Server Error"),
-    STATION_NOT_FOUND("400", "Entity Not Found. stationId: %s"),
-    LINE_NOT_FOUND("400", "Entity Not Found. lineId: %s"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Server Error"),
+    STATION_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "Entity Not Found. stationId: %s"),
+    LINE_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "Entity Not Found. lineId: %s"),
 
-    INVALID_UP_STATION("400","Invalid Up Station. upStationId: %s"),
-    INVALID_DOWN_STATION("400","Invalid Down Station. downStationId: %s"),
-    SECTION_ALREADY_EXISTS("400","Section is already existed. upStationId: %s, downStationId: %s"),
-    INVALID_SECTION_LENGTH("400","Invalid Section Length. distance: %s"),
+    INVALID_UP_STATION(HttpStatus.BAD_REQUEST.value(),"Invalid Up Station. upStationId: %s"),
+    INVALID_DOWN_STATION(HttpStatus.BAD_REQUEST.value(),"Invalid Down Station. downStationId: %s"),
+    SECTION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(),"Section is already existed. upStationId: %s, downStationId: %s"),
+    INVALID_SECTION_LENGTH(HttpStatus.BAD_REQUEST.value(),"Invalid Section Length. distance: %s"),
 
-    CANNOT_DELETE_SINGLE_SECTION("400", "Cannot Delete Single Section"),
-    CANNOT_DELETE_NON_LAST_DOWN_STATION("400", "Cannot Delete Non-Last Down Station");
+    CANNOT_DELETE_SINGLE_SECTION(HttpStatus.BAD_REQUEST.value(), "Cannot Delete Single Section"),
+    CANNOT_DELETE_NON_LAST_DOWN_STATION(HttpStatus.BAD_REQUEST.value(), "Cannot Delete Non-Last Down Station");
 
-    private final String code;
+    private final int code;
     private final String message;
 }
