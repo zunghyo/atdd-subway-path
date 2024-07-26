@@ -24,11 +24,12 @@ import nextstep.subway.station.domain.Station;
 @NoArgsConstructor
 public class LineSections {
 
-    @OneToMany(mappedBy = "line", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "line", cascade = {CascadeType.PERSIST,
+        CascadeType.MERGE}, fetch = FetchType.LAZY, orphanRemoval = true)
     private final List<LineSection> lineSections = new ArrayList<>();
 
     public void addSection(LineSection newLineSection) {
-        if(lineSections.isEmpty()) {
+        if (lineSections.isEmpty()) {
             lineSections.add(newLineSection);
             return;
         }
@@ -38,10 +39,10 @@ public class LineSections {
     }
 
     public void deleteSection(Station station) {
-        if(lineSections.size() <= 1) {
+        if (lineSections.size() <= 1) {
             throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_SINGLE_SECTION);
         }
-        if(!isSameAsLastDownStation(station)) {
+        if (!isSameAsLastDownStation(station)) {
             throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_NON_LAST_DOWN_STATION);
         }
         lineSections.remove(lineSections.size() - 1);
@@ -53,22 +54,22 @@ public class LineSections {
         Station newDownStation = newLineSection.getDownStation();
 
         // 상행역은 기존 노선 존재하지 않고, 하행역이 상행 종착역이 아닌 경우
-        if(!isContainStations(newUpStation) && !isSameAsFirstUpStation(newDownStation)) {
+        if (!isContainStations(newUpStation) && !isSameAsFirstUpStation(newDownStation)) {
             throw new InvalidDownStationException(newDownStation.getId());
         }
 
         // 새로운 노선이 기존 노선에 이미 존재하는 경우
-        if(isSameStation(newUpStation, newDownStation)) {
+        if (isSameStation(newUpStation, newDownStation)) {
             throw new SectionAlreadyExistsException(newUpStation.getId(), newDownStation.getId());
         }
 
         // 상행역이 기존 상행역에 존재하고, 하행역이 기존역에 존재하는 경우
-        if(isContainUpStations(newUpStation) && isContainStations(newDownStation)) {
+        if (isContainUpStations(newUpStation) && isContainStations(newDownStation)) {
             throw new InvalidDownStationException(newLineSection.getDistance());
         }
 
         // 상행역이 기존 상행역에 존재하고, 하행역이 기존 하행역보다 길거나 같은 경우
-        if(isContainUpStations(newUpStation) && isLongerThanExistingSection(newLineSection)) {
+        if (isContainUpStations(newUpStation) && isLongerThanExistingSection(newLineSection)) {
             throw new InvalidSectionLengthException(newLineSection.getDistance());
         }
     }
@@ -103,7 +104,8 @@ public class LineSections {
             .orElseThrow(() -> new InvalidUpStationException(newUpStation.getId()));
     }
 
-    private static LineSection createNewDownSection(LineSection newLineSection, LineSection existingSection) {
+    private static LineSection createNewDownSection(LineSection newLineSection,
+        LineSection existingSection) {
         return new LineSection(
             existingSection.getLine(),
             newLineSection.getDownStation(),
@@ -112,7 +114,8 @@ public class LineSections {
         );
     }
 
-    private void replaceSectionWithNewSections(LineSection newLineSection, LineSection existingSection, LineSection newDownSection) {
+    private void replaceSectionWithNewSections(LineSection newLineSection,
+        LineSection existingSection, LineSection newDownSection) {
         int index = lineSections.indexOf(existingSection);
         lineSections.add(index + 1, newLineSection);
         lineSections.add(index + 2, newDownSection);
@@ -131,7 +134,9 @@ public class LineSections {
 
     private boolean isSameStation(Station upStation, Station downStation) {
         return lineSections.stream()
-            .anyMatch(section -> section.getUpStation().equals(upStation) && section.getDownStation().equals(downStation));
+            .anyMatch(
+                section -> section.getUpStation().equals(upStation) && section.getDownStation()
+                    .equals(downStation));
     }
 
     private boolean isSameAsFirstUpStation(Station downStation) {
@@ -160,12 +165,14 @@ public class LineSections {
         return getStations().stream()
             .anyMatch(station -> station.equals(compareStation));
     }
+
     private boolean isContainUpStations(Station compareStation) {
         return lineSections.stream()
             .map(LineSection::getUpStation)
             .collect(Collectors.toList()).stream()
             .anyMatch(station -> station.equals(compareStation));
     }
+
     public List<Station> getStations() {
         return lineSections.stream()
             .flatMap(lineSection -> Stream.of(
@@ -174,6 +181,7 @@ public class LineSections {
             .distinct()
             .collect(Collectors.toList());
     }
+
     public int size() {
         return lineSections.size();
     }
