@@ -68,7 +68,7 @@ public class LineSectionAcceptanceTest {
         Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("강남역"), 지하철역_id("신사역"), 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
