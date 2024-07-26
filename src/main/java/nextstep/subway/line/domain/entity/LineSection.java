@@ -40,4 +40,7 @@ public class LineSection {
         this.distance = distance;
     }
 
+    public boolean hasSameUpStation(Station station) {
+        return this.upStation.equals(station);
+    }
 }
