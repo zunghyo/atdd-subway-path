@@ -4,20 +4,13 @@ import static nextstep.subway.acceptance.common.SubwayUtils.responseToId;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToLocation;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToName;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToNames;
-import static nextstep.subway.acceptance.line.LineUtils.responseToStationNames;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_목록조회;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_삭제;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_생성;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_수정;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_조회;
-import static nextstep.subway.acceptance.station.StationUtils.지하철역_생성;
+import static nextstep.subway.acceptance.line.LineUtils.*;
+import static nextstep.subway.acceptance.station.StationUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,17 +23,19 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LineAcceptanceTest {
-
-    private static Map<String, Long> stationIds = new HashMap<>();
+    private Long 신사역_id;
+    private Long 논현역_id;
+    private Long 강남역_id;
+    private Long 역삼역_id;
 
     @BeforeEach
-    void setUp() {
-        stationIds.put("신사역", 지하철역_생성_후_id_추출("신사역"));
-        stationIds.put("논현역", 지하철역_생성_후_id_추출("논현역"));
-        stationIds.put("역삼역", 지하철역_생성_후_id_추출("역삼역"));
-        stationIds.put("강남역", 지하철역_생성_후_id_추출("강남역"));
+    public void setUp() {
+        신사역_id = 지하철역_생성_후_id_추출(신사역);
+        논현역_id = 지하철역_생성_후_id_추출(논현역);
+        강남역_id = 지하철역_생성_후_id_추출(강남역);
+        역삼역_id = 지하철역_생성_후_id_추출(역삼역);
     }
-
+    
     /**
      * When 새로운 지하철 노선을 입력하고, 관리자가 노선을 생성하면
      * Then 해당 노선이 생성된다.
@@ -50,12 +45,12 @@ public class LineAcceptanceTest {
     @Test
     void createLine() {
         // when
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         //then
         String 생성된_노선명 = responseToName(신분당선_생성_응답);
-        assertThat(생성된_노선명).isEqualTo("신분당선");
+        assertThat(생성된_노선명).isEqualTo(신분당선);
     }
 
     /**
@@ -67,17 +62,17 @@ public class LineAcceptanceTest {
     @Test
     void showLines() {
         //given
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
-        ExtractableResponse<Response> 이호선_생성_응답 = 지하철노선_생성("2호선", "bg-red-600", 지하철역_id("역삼역"), 지하철역_id("강남역"), 10L);
+        ExtractableResponse<Response> 이호선_생성_응답 = 지하철노선_생성(이호선, "bg-red-600", 역삼역_id, 강남역_id, 10L);
         assertThat(이호선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         //when
         List<String> 지하철노선명_목록 = responseToNames(지하철노선_목록조회());
 
         //then
-        assertThat(지하철노선명_목록).containsExactlyInAnyOrder("신분당선", "2호선");
+        assertThat(지하철노선명_목록).containsExactlyInAnyOrder(신분당선, 이호선);
 
     }
 
@@ -90,18 +85,17 @@ public class LineAcceptanceTest {
     @Test
     void showLine() {
         //given
-        ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-        assertThat(지하철노선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         //when
-        ExtractableResponse<Response> 지하철노선_조회_응답 = 지하철노선_조회(responseToId(지하철노선_생성_응답));
+        ExtractableResponse<Response> 지하철노선_조회_응답 = 지하철노선_조회(신분당선_id);
 
         //then
         String 지하철노선_이름 = responseToName(지하철노선_조회_응답);
-        assertThat(지하철노선_이름).isEqualTo("신분당선");
+        assertThat(지하철노선_이름).isEqualTo(신분당선);
 
         List<String> 지하철노선의_역이름_목록 = responseToStationNames(지하철노선_조회_응답);
-        assertThat(지하철노선의_역이름_목록).containsExactlyInAnyOrder("신사역", "논현역");
+        assertThat(지하철노선의_역이름_목록).containsExactlyInAnyOrder(신사역, 논현역);
     }
 
     /**
@@ -113,20 +107,17 @@ public class LineAcceptanceTest {
     @Test
     void updateLine() {
         //given
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-
-        Long 생성된노선_id = responseToId(신분당선_생성_응답);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         //when
-        ExtractableResponse<Response> 지하철노선_수정_응답 = 지하철노선_수정(생성된노선_id, "1호선", "bg-blue-600");
+        ExtractableResponse<Response> 지하철노선_수정_응답 = 지하철노선_수정(신분당선_id, 일호선, "bg-blue-600");
 
         //then
         assertThat(지하철노선_수정_응답.statusCode()).isEqualTo(HttpStatus.OK.value());
 
         //then
-        String 수정된노선_이름 = responseToName(지하철노선_조회(생성된노선_id));
-        assertThat(수정된노선_이름).isEqualTo("1호선");
+        String 수정된노선_이름 = responseToName(지하철노선_조회(신분당선_id));
+        assertThat(수정된노선_이름).isEqualTo(일호선);
     }
 
     /**
@@ -138,8 +129,7 @@ public class LineAcceptanceTest {
     @Test
     void deleteLine() {
         //given
-        ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-        assertThat(지하철노선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성_후_검증(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         //when
         ExtractableResponse<Response> 지하철노선_삭제_응답 = 지하철노선_삭제(responseToLocation(지하철노선_생성_응답));
@@ -149,19 +139,8 @@ public class LineAcceptanceTest {
 
         //then
         List<String> 지하철노선_목록 = responseToNames(지하철노선_목록조회());
-        assertThat(지하철노선_목록).doesNotContain("신분당선");
+        assertThat(지하철노선_목록).doesNotContain(신분당선);
 
-    }
-
-    private static Long 지하철역_생성_후_id_추출(String name) {
-        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성(name);
-
-        assertThat(지하철역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-        return responseToId(지하철역_생성_응답);
-    }
-
-    private static Long 지하철역_id(String name) {
-        return stationIds.get(name);
     }
 
 }

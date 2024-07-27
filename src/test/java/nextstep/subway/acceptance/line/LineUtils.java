@@ -1,6 +1,5 @@
 package nextstep.subway.acceptance.line;
 
-
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToId;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,6 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 public class LineUtils {
+    public static final String 신분당선 = "신분당선";
+    public static final String 일호선 = "일호선";
+    public static final String 이호선 = "이호선선";
 
     public static ExtractableResponse<Response> 지하철노선_생성(String name, String color, Long upStationId, Long downStationId, Long distance) {
         Map<String, Object> params = createParams(name, color, upStationId, downStationId, distance);
@@ -29,11 +31,15 @@ public class LineUtils {
         return response;
     }
 
-    public static Long 지하철노선_생성_후_ID_반환(String name, String color, Long upStationId, Long downStationId, Long distance) {
+    public static ExtractableResponse<Response> 지하철노선_생성_후_검증(String name, String color, Long upStationId, Long downStationId, Long distance) {
         ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성(name, color, upStationId, downStationId, distance);
         assertThat(지하철노선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
-        return responseToId(지하철노선_생성_응답);
+        return 지하철노선_생성_응답;
+    }
+
+    public static Long 지하철노선_생성_후_ID_반환(String name, String color, Long upStationId, Long downStationId, Long distance) {
+        return responseToId(지하철노선_생성_후_검증(name, color, upStationId, downStationId, distance));
     }
 
     public static ExtractableResponse<Response> 지하철노선_목록조회() {

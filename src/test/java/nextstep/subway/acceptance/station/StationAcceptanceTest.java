@@ -2,9 +2,7 @@ package nextstep.subway.acceptance.station;
 
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToLocation;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToNames;
-import static nextstep.subway.acceptance.station.StationUtils.지하철역_목록조회;
-import static nextstep.subway.acceptance.station.StationUtils.지하철역_삭제;
-import static nextstep.subway.acceptance.station.StationUtils.지하철역_생성;
+import static nextstep.subway.acceptance.station.StationUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.response.ExtractableResponse;
@@ -30,12 +28,12 @@ public class StationAcceptanceTest {
     @Test
     void createStation() {
         // when
-        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성("강남역");
+        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성(강남역);
         assertThat(지하철역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         // then
         List<String> 지하철역_목록 = responseToNames(지하철역_목록조회());
-        assertThat(지하철역_목록).containsAnyOf("강남역");
+        assertThat(지하철역_목록).containsAnyOf(강남역);
     }
 
     /**
@@ -47,18 +45,18 @@ public class StationAcceptanceTest {
     @Test
     void showStations() {
         // given
-        ExtractableResponse<Response> 강남역_생성_응답 = 지하철역_생성("강남역");
+        ExtractableResponse<Response> 강남역_생성_응답 = 지하철역_생성(강남역);
         assertThat(강남역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
-        ExtractableResponse<Response> 망원역_생성_응답 = 지하철역_생성("망원역");
-        assertThat(망원역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        ExtractableResponse<Response> 역삼역_생성_응답 = 지하철역_생성(역삼역);
+        assertThat(역삼역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         // when
         List<String> 지하철역_목록 = responseToNames(지하철역_목록조회());
 
         // then
         assertThat(지하철역_목록).hasSize(2);
-        assertThat(지하철역_목록).containsExactlyInAnyOrder("강남역", "망원역");
+        assertThat(지하철역_목록).containsExactlyInAnyOrder(강남역, 역삼역);
 
     }
 
@@ -71,7 +69,7 @@ public class StationAcceptanceTest {
     @Test
     void deleteStation() {
         // given
-        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성("강남역");
+        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성(강남역);
         assertThat(지하철역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         // when
@@ -80,6 +78,6 @@ public class StationAcceptanceTest {
         // then
         List<String> 지하철역_목록 = responseToNames(지하철역_목록조회());
         assertThat(지하철역_목록).hasSize(0);
-        assertThat(지하철역_목록).doesNotContain("강남역");
+        assertThat(지하철역_목록).doesNotContain(강남역);
     }
 }

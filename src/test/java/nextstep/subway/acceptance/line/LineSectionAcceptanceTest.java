@@ -1,19 +1,13 @@
 package nextstep.subway.acceptance.line;
 
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToId;
-import static nextstep.subway.acceptance.line.LineUtils.responseToStationNames;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_생성;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_생성_후_ID_반환;
-import static nextstep.subway.acceptance.line.LineUtils.지하철노선_조회;
-import static nextstep.subway.acceptance.line.SectionUtils.지하철구간_삭제;
-import static nextstep.subway.acceptance.line.SectionUtils.지하철구간_생성;
-import static nextstep.subway.acceptance.station.StationUtils.지하철역_생성;
+import static nextstep.subway.acceptance.line.LineUtils.*;
+import static nextstep.subway.acceptance.line.SectionUtils.*;
+import static nextstep.subway.acceptance.station.StationUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,16 +20,17 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LineSectionAcceptanceTest {
-
-    private static final Map<String, Long> stationIds = new HashMap<>();
+    private Long 신사역_id;
+    private Long 논현역_id;
+    private Long 신논현역_id;
+    private Long 강남역_id;
 
     @BeforeEach
-    void setUp() {
-        stationIds.put("신사역", 지하철역_생성_후_id_추출("신사역"));
-        stationIds.put("논현역", 지하철역_생성_후_id_추출("논현역"));
-        stationIds.put("신논현역", 지하철역_생성_후_id_추출("신논현역"));
-        stationIds.put("강남역", 지하철역_생성_후_id_추출("강남역"));
-        stationIds.put("역삼역", 지하철역_생성_후_id_추출("역삼역"));
+    public void setUp() {
+        신사역_id = 지하철역_생성_후_id_추출(신사역);
+        논현역_id = 지하철역_생성_후_id_추출(논현역);
+        신논현역_id = 지하철역_생성_후_id_추출(신논현역);
+        강남역_id = 지하철역_생성_후_id_추출(강남역);
     }
 
     /**
@@ -47,10 +42,10 @@ public class LineSectionAcceptanceTest {
     @Test
     void createSection1() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("논현역"), 지하철역_id("신논현역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 논현역_id, 신논현역_id, 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -65,10 +60,10 @@ public class LineSectionAcceptanceTest {
     @Test
     void createSection2() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("강남역"), 지하철역_id("신사역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 강남역_id, 신사역_id, 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -83,10 +78,10 @@ public class LineSectionAcceptanceTest {
     @Test
     void createSection3() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("신사역"), 지하철역_id("신논현역"), 5L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 신사역_id, 신논현역_id, 5L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -101,10 +96,10 @@ public class LineSectionAcceptanceTest {
     @Test
     void createSectionException() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("신논현역"), 지하철역_id("강남역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 신논현역_id, 강남역_id, 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -119,10 +114,10 @@ public class LineSectionAcceptanceTest {
     @DisplayName("새로운 구간이 이미 등록되어 있으면 예외가 발생한다.")
     @Test
     void createSectionException4() {
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 신사역_id, 논현역_id, 10L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -136,11 +131,11 @@ public class LineSectionAcceptanceTest {
     @DisplayName("새로운 구간의 상행역이 기존 상행역에 존재하고, 하행역도 기존 노선에 존재하면 예외가 발생한다.")
     @Test
     void createSectionException6() {
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-        지하철구간_생성(신분당선_id, 지하철역_id("논현역"), 지하철역_id("강남역"), 5L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        지하철구간_생성(신분당선_id, 논현역_id, 강남역_id, 5L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("논현역"), 지하철역_id("신사역"), 5L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 논현역_id, 신사역_id, 5L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -154,10 +149,10 @@ public class LineSectionAcceptanceTest {
     @DisplayName("새로운 구간의 길이가 기존 구간보다 길거나 같으면 예외가 발생한다.")
     @Test
     void createSectionException5() {
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("신논현역"), 10L);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 신논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("신사역"), 지하철역_id("논현역"), 20L);
+        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 신사역_id, 논현역_id, 20L);
 
         // then
         assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -172,17 +167,15 @@ public class LineSectionAcceptanceTest {
     @Test
     void deleteSection() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("논현역"), 지하철역_id("신논현역"), 10L);
-        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        지하철구간_생성_후_검증(신분당선_id, 논현역_id, 신논현역_id, 10L);
 
         // when
-        지하철구간_삭제(신분당선_id, 지하철역_id("신논현역"));
+        지하철구간_삭제(신분당선_id, 신논현역_id);
 
         // then
         ExtractableResponse<Response> 지하철노선_조회_응답 = 지하철노선_조회(신분당선_id);
-        assertThat(responseToStationNames(지하철노선_조회_응답)).doesNotContain("신논현역");
+        assertThat(responseToStationNames(지하철노선_조회_응답)).doesNotContain(신논현역);
     }
 
     /**
@@ -194,13 +187,11 @@ public class LineSectionAcceptanceTest {
     @Test
     void deleteSectionException() {
         //given
-        Long 신분당선_id = 지하철노선_생성_후_ID_반환("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-
-        ExtractableResponse<Response> 지하철구간_생성_응답 = 지하철구간_생성(신분당선_id, 지하철역_id("논현역"), 지하철역_id("신논현역"), 10L);
-        assertThat(지하철구간_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        지하철구간_생성_후_검증(신분당선_id, 논현역_id, 신논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_삭제_응답 = 지하철구간_삭제(신분당선_id, 지하철역_id("논현역"));
+        ExtractableResponse<Response> 지하철구간_삭제_응답 = 지하철구간_삭제(신분당선_id, 논현역_id);
 
         // then
         assertThat(지하철구간_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -216,26 +207,14 @@ public class LineSectionAcceptanceTest {
     @Test
     void deleteSectionException2() {
         //given
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성("신분당선", "bg-red-600", 지하철역_id("신사역"), 지하철역_id("논현역"), 10L);
-        assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-        Long 신분당선_id = responseToId(신분당선_생성_응답);
+        Long 신분당선_id = 지하철노선_생성_후_ID_반환(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
 
         // when
-        ExtractableResponse<Response> 지하철구간_삭제_응답 = 지하철구간_삭제(신분당선_id, 지하철역_id("논현역"));
+        ExtractableResponse<Response> 지하철구간_삭제_응답 = 지하철구간_삭제(신분당선_id, 논현역_id);
 
         // then
         assertThat(지하철구간_삭제_응답.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
 
-    }
-
-    private static Long 지하철역_생성_후_id_추출(String name) {
-        ExtractableResponse<Response> 지하철역_생성_응답 = 지하철역_생성(name);
-        assertThat(지하철역_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
-        return responseToId(지하철역_생성_응답);
-    }
-
-    private static Long 지하철역_id(String name) {
-        return stationIds.get(name);
     }
 
 }
