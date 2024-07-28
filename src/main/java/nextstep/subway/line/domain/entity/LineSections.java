@@ -123,13 +123,9 @@ public class LineSections {
     }
 
     private boolean isLongerThanExistingSection(LineSection newSection) {
-        for (LineSection section : lineSections) {
-            if (section.getUpStation().equals(newSection.getUpStation()) &&
-                newSection.getDistance() >= section.getDistance()) {
-                return true;
-            }
-        }
-        return false;
+        return lineSections.stream()
+            .filter(section -> section.getUpStation().equals(newSection.getUpStation()))
+            .anyMatch(section -> newSection.getDistance() >= section.getDistance());
     }
 
     private boolean isSameStation(Station upStation, Station downStation) {
@@ -150,15 +146,16 @@ public class LineSections {
     }
 
     private Optional<Station> getFirstUpStation() {
-        Optional<LineSection> firstSection =
-            lineSections.isEmpty() ? Optional.empty() : Optional.of(lineSections.get(0));
-        return firstSection.map(LineSection::getUpStation);
+        return lineSections.stream()
+            .findFirst()
+            .map(LineSection::getUpStation);
     }
 
     private Optional<Station> getLastDownStation() {
-        Optional<LineSection> lastSection = lineSections.isEmpty() ? Optional.empty()
-            : Optional.of(lineSections.get(lineSections.size() - 1));
-        return lastSection.map(LineSection::getDownStation);
+        if(lineSections.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(lineSections.get(lineSections.size() - 1).getDownStation());
     }
 
     private boolean isContainStations(Station compareStation) {
