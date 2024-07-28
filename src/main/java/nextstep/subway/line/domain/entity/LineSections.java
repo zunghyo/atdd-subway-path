@@ -18,6 +18,7 @@ import nextstep.subway.line.exception.InvalidSectionLengthException;
 import nextstep.subway.line.exception.InvalidUpStationException;
 import nextstep.subway.line.exception.SectionAlreadyExistsException;
 import nextstep.subway.station.domain.Station;
+import nextstep.subway.station.exception.StationNotFoundException;
 
 @Embeddable
 @Getter
@@ -39,13 +40,8 @@ public class LineSections {
     }
 
     public void deleteSection(Station station) {
-        if (lineSections.size() <= 1) {
-            throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_SINGLE_SECTION);
-        }
-        if (!isSameAsLastDownStation(station)) {
-            throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_NON_LAST_DOWN_STATION);
-        }
-        lineSections.remove(lineSections.size() - 1);
+        validateDeletelineSection();
+        deleteSectionByPosition(station);
     }
 
     private void validateNewLineSection(LineSection newLineSection) {
@@ -104,7 +100,7 @@ public class LineSections {
             .orElseThrow(() -> new InvalidUpStationException(newUpStation.getId()));
     }
 
-    private static LineSection createNewDownSection(LineSection newLineSection,
+    private LineSection createNewDownSection(LineSection newLineSection,
         LineSection existingSection) {
         return new LineSection(
             existingSection.getLine(),
@@ -170,6 +166,48 @@ public class LineSections {
             .anyMatch(station -> station.equals(compareStation));
     }
 
+    private void validateDeletelineSection() {
+        if(lineSections.size() <= 1) {
+            throw new SubwayException(SubwayExceptionType.CANNOT_DELETE_SINGLE_SECTION);
+        }
+    }
+
+    private void deleteSectionByPosition(Station station) {
+        if(isSameAsFirstUpStation(station)) {
+            lineSections.remove(0);
+            return;
+        }
+        if(isSameAsLastDownStation(station)) {
+            lineSections.remove(lineSections.size() - 1);
+            return;
+        }
+
+        deleteLineSectionInMiddle(station);
+    }
+
+    private void deleteLineSectionInMiddle(Station station) {
+        LineSection prevLineSection = getPreviousLineSection(station);
+        LineSection nextLineSection = getNextLineSection(station);
+
+        prevLineSection.updateDownStationAndDistance(nextLineSection.getDownStation(),
+            prevLineSection.getDistance() + nextLineSection.getDistance());
+        lineSections.remove(nextLineSection);
+    }
+
+    private LineSection getPreviousLineSection(Station station) {
+        return lineSections.stream()
+            .filter(lineSection -> lineSection.getDownStation().equals(station))
+            .findFirst()
+            .orElseThrow(() -> new StationNotFoundException(station.getId()));
+    }
+
+    private LineSection getNextLineSection(Station station) {
+        return lineSections.stream()
+            .filter(lineSection -> lineSection.getUpStation().equals(station))
+            .findFirst()
+            .orElseThrow(() -> new StationNotFoundException(station.getId()));
+    }
+
     public List<Station> getStations() {
         return lineSections.stream()
             .flatMap(lineSection -> Stream.of(
@@ -182,4 +220,5 @@ public class LineSections {
     public int size() {
         return lineSections.size();
     }
+
 }
