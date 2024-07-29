@@ -15,6 +15,7 @@ import nextstep.subway.station.domain.Station;
 @Getter
 @NoArgsConstructor
 public class LineSection {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

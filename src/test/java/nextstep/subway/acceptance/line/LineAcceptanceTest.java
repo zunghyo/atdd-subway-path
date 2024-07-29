@@ -23,6 +23,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class LineAcceptanceTest {
+
     private Long 신사역_id;
     private Long 논현역_id;
     private Long 강남역_id;
@@ -35,17 +36,16 @@ public class LineAcceptanceTest {
         강남역_id = 지하철역_생성_후_id_추출(강남역);
         역삼역_id = 지하철역_생성_후_id_추출(역삼역);
     }
-    
+
     /**
-     * When 새로운 지하철 노선을 입력하고, 관리자가 노선을 생성하면
-     * Then 해당 노선이 생성된다.
-     * Then 노선 목록에 포함된다.
+     * When 새로운 지하철 노선을 입력하고, 관리자가 노선을 생성하면 Then 해당 노선이 생성된다. Then 노선 목록에 포함된다.
      */
     @DisplayName("지하철 노선을 생성한다.")
     @Test
     void createLine() {
         // when
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id,
+            10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         //then
@@ -54,15 +54,14 @@ public class LineAcceptanceTest {
     }
 
     /**
-     * Given 여러개의 지하철 노선이 등록되어 있고
-     * When 지하철 노선 목록을 조회하면
-     * Then 모든 지하철 노선 목록이 조회된다.
+     * Given 여러개의 지하철 노선이 등록되어 있고 When 지하철 노선 목록을 조회하면 Then 모든 지하철 노선 목록이 조회된다.
      */
     @DisplayName("지하철 노선 목록을 조회한다.")
     @Test
     void showLines() {
         //given
-        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        ExtractableResponse<Response> 신분당선_생성_응답 = 지하철노선_생성(신분당선, "bg-red-600", 신사역_id, 논현역_id,
+            10L);
         assertThat(신분당선_생성_응답.statusCode()).isEqualTo(HttpStatus.CREATED.value());
 
         ExtractableResponse<Response> 이호선_생성_응답 = 지하철노선_생성(이호선, "bg-red-600", 역삼역_id, 강남역_id, 10L);
@@ -77,9 +76,7 @@ public class LineAcceptanceTest {
     }
 
     /**
-     * Given 특정 지하철 노선이 등록되어 있고
-     * When 해당 노선을 조회하면
-     * Then 해당 지하철 노선 목록이 조회된다.
+     * Given 특정 지하철 노선이 등록되어 있고 When 해당 노선을 조회하면 Then 해당 지하철 노선 목록이 조회된다.
      */
     @DisplayName("지하철 노선을 조회한다.")
     @Test
@@ -99,9 +96,7 @@ public class LineAcceptanceTest {
     }
 
     /**
-     * Given 특정 지하철 노선이 등록되어 있고
-     * When 해당 노선을 수정하면
-     * Then 해당 노선의 정보가 수정된다.
+     * Given 특정 지하철 노선이 등록되어 있고 When 해당 노선을 수정하면 Then 해당 노선의 정보가 수정된다.
      */
     @DisplayName("지하철 노선을 수정한다.")
     @Test
@@ -121,15 +116,14 @@ public class LineAcceptanceTest {
     }
 
     /**
-     * Given 특정 지하철 노선이 등록되어 있고
-     * When 해당 노선을 삭제하면
-     * Then 해당 노선이 삭제되고 노선 목록에서 제외된다.
+     * Given 특정 지하철 노선이 등록되어 있고 When 해당 노선을 삭제하면 Then 해당 노선이 삭제되고 노선 목록에서 제외된다.
      */
     @DisplayName("지하철 노선을 삭제한다.")
     @Test
     void deleteLine() {
         //given
-        ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성_후_검증(신분당선, "bg-red-600", 신사역_id, 논현역_id, 10L);
+        ExtractableResponse<Response> 지하철노선_생성_응답 = 지하철노선_생성_후_검증(신분당선, "bg-red-600", 신사역_id,
+            논현역_id, 10L);
 
         //when
         ExtractableResponse<Response> 지하철노선_삭제_응답 = 지하철노선_삭제(responseToLocation(지하철노선_생성_응답));

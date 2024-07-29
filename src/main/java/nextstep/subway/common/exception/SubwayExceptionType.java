@@ -12,13 +12,15 @@ public enum SubwayExceptionType {
     STATION_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "Entity Not Found. stationId: %s"),
     LINE_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "Entity Not Found. lineId: %s"),
 
-    INVALID_UP_STATION(HttpStatus.BAD_REQUEST.value(),"Invalid Up Station. upStationId: %s"),
-    INVALID_DOWN_STATION(HttpStatus.BAD_REQUEST.value(),"Invalid Down Station. downStationId: %s"),
-    SECTION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(),"Section is already existed. upStationId: %s, downStationId: %s"),
-    INVALID_SECTION_LENGTH(HttpStatus.BAD_REQUEST.value(),"Invalid Section Length. distance: %s"),
+    INVALID_UP_STATION(HttpStatus.BAD_REQUEST.value(), "Invalid Up Station. upStationId: %s"),
+    INVALID_DOWN_STATION(HttpStatus.BAD_REQUEST.value(), "Invalid Down Station. downStationId: %s"),
+    SECTION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(),
+        "Section is already existed. upStationId: %s, downStationId: %s"),
+    INVALID_SECTION_LENGTH(HttpStatus.BAD_REQUEST.value(), "Invalid Section Length. distance: %s"),
 
     CANNOT_DELETE_SINGLE_SECTION(HttpStatus.BAD_REQUEST.value(), "Cannot Delete Single Section"),
-    CANNOT_DELETE_NON_LAST_DOWN_STATION(HttpStatus.BAD_REQUEST.value(), "Cannot Delete Non-Last Down Station");
+    CANNOT_DELETE_NON_LAST_DOWN_STATION(HttpStatus.BAD_REQUEST.value(),
+        "Cannot Delete Non-Last Down Station");
 
     private final int code;
     private final String message;

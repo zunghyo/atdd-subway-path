@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
 public class StationUtils {
+
     public static final String 신사역 = "신사역";
     public static final String 논현역 = "논현역";
     public static final String 신논현역 = "신논현역";

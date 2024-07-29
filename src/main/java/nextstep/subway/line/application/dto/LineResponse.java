@@ -8,6 +8,7 @@ import nextstep.subway.station.application.dto.StationResponse;
 @Getter
 @AllArgsConstructor
 public class LineResponse {
+
     private Long id;
     private String name;
     private String color;
