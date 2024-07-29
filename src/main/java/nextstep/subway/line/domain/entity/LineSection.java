@@ -43,4 +43,9 @@ public class LineSection {
     public boolean hasSameUpStation(Station station) {
         return this.upStation.equals(station);
     }
+
+    public void updateDownStationAndDistance(Station downStation, long distance) {
+        this.downStation = downStation;
+        this.distance = distance;
+    }
 }

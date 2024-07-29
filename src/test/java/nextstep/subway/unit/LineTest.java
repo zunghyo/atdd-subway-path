@@ -119,8 +119,20 @@ class LineTest {
     @Nested
     class RemoveSectionTest {
         @Test
-        @DisplayName("지하철 구간을 제거한다.")
+        @DisplayName("노선에 등록된 상행 종점역을 삭제한다.")
         void removeSection() {
+            // given
+            신분당선.addSection(new LineSection(신분당선, 논현역, 신논현역, 10L));
+
+            // when
+            신분당선.deleteSection(신사역);
+
+            // then
+            assertThat(신분당선.getLineSections().size()).isEqualTo(1);
+        }
+        @Test
+        @DisplayName("노선에 등록된 하행 종점역을 삭제한다.")
+        void removeSection2() {
             // given
             신분당선.addSection(new LineSection(신분당선, 논현역, 신논현역, 10L));
 
@@ -131,15 +143,16 @@ class LineTest {
             assertThat(신분당선.getLineSections().size()).isEqualTo(1);
         }
         @Test
-        @DisplayName("삭제할 구간이 하행 종점역이 아닌 경우 SubwayException 예외가 발생한다.")
-        void removeSectionException1() {
+        @DisplayName("노선에 등록된 중간역을 삭제한다.")
+        void removeSection3() {
             // given
             신분당선.addSection(new LineSection(신분당선, 논현역, 신논현역, 10L));
 
-            // when, then
-            assertThrows(SubwayException.class, () -> {
-                신분당선.deleteSection(논현역);
-            });
+            // when
+            신분당선.deleteSection(논현역);
+
+            // then
+            assertThat(신분당선.getLineSections().size()).isEqualTo(1);
         }
         @Test
         @DisplayName("삭제할 구간이 1개인 경우 SubwayException 예외가 발생한다.")
@@ -150,7 +163,6 @@ class LineTest {
             });
         }
     }
-
 
     @DisplayName("getStations 테스트")
     @Nested
