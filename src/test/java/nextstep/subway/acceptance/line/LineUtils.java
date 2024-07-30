@@ -16,7 +16,8 @@ public class LineUtils {
 
     public static final String 신분당선 = "신분당선";
     public static final String 일호선 = "일호선";
-    public static final String 이호선 = "이호선선";
+    public static final String 이호선 = "이호선";
+    public static final String 삼호선 = "삼호선";
 
     public static ExtractableResponse<Response> 지하철노선_생성(String name, String color,
         Long upStationId, Long downStationId, Long distance) {

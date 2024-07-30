@@ -221,4 +221,7 @@ public class LineSections {
         return lineSections.size();
     }
 
+    public Stream<LineSection> stream() {
+        return lineSections.stream();
+    }
 }
