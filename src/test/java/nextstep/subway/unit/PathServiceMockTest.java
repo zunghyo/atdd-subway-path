@@ -44,8 +44,8 @@ public class PathServiceMockTest {
 
     private Station source;
     private Station target;
-    Long sourceId = 1L;
-    Long targetId = 2L;
+    private Long sourceId = 1L;
+    private Long targetId = 2L;
     private List<Line> lines;
 
     @BeforeEach
