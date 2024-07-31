@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ShortestPathFinder implements PathFinder {
 
-    private WeightedMultigraph<Station, DefaultWeightedEdge> graph = new WeightedMultigraph<>(
+    private final WeightedMultigraph<Station, DefaultWeightedEdge> graph = new WeightedMultigraph<>(
         DefaultWeightedEdge.class);
 
     @Override
