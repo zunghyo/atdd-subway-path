@@ -26,10 +26,6 @@ public class PathService {
         Station target = stationRepository.findByIdOrThrow(targetId);
         List<Line> lines = lineRepository.findAll();
 
-        if (sourceId.equals(targetId)) {
-            throw new SubwayException(SubwayExceptionType.SOURCE_AND_TARGET_SAME);
-        }
-
         return pathFinder.find(lines, source, target);
     }
 }

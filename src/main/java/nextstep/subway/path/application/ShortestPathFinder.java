@@ -23,11 +23,19 @@ public class ShortestPathFinder implements PathFinder {
     @Override
     public PathResponse find(List<Line> lines, Station source, Station target) {
 
+        validateSourceAndTargetStations(source, target);
+
         setUpGraph(lines, graph);
         GraphPath<Station, DefaultWeightedEdge> path = findShortestPath(
             source, target, graph);
 
         return getPathResponse(path);
+    }
+
+    private static void validateSourceAndTargetStations(Station source, Station target) {
+        if (source.getId().equals(target.getId())) {
+            throw new SubwayException(SubwayExceptionType.SOURCE_AND_TARGET_SAME);
+        }
     }
 
     private void setUpGraph(List<Line> lines,
