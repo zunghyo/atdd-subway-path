@@ -1,7 +1,6 @@
 package nextstep.subway.path.application;
 
 import java.util.List;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import nextstep.subway.common.exception.SubwayException;
 import nextstep.subway.common.exception.SubwayExceptionType;
@@ -22,7 +21,6 @@ public class PathService {
     private final StationRepository stationRepository;
     private final LineRepository lineRepository;
 
-    @Transactional
     public PathResponse findShortestPath(Long sourceId, Long targetId) {
         Station source = stationRepository.findByIdOrThrow(sourceId);
         Station target = stationRepository.findByIdOrThrow(targetId);
