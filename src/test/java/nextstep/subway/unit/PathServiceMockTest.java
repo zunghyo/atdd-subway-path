@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
+import com.jayway.jsonpath.PathNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 import nextstep.subway.acceptance.station.StationUtils;
@@ -53,7 +54,6 @@ public class PathServiceMockTest {
     private Long sourceId;
     private Long targetId;
 
-
     /**
      * 교대역    --- *2호선* ---   강남역 |                        | *3호선*                   *신분당선* | |
      * 남부터미널역  --- *3호선* ---   양재
@@ -65,13 +65,16 @@ public class PathServiceMockTest {
         강남역 = new Station("강남역");
         양재역 = new Station("양재역");
         남부터미널역 = new Station("남부터미널역");
+
         Line 이호선 = new Line("이호선", "bg-red-600", new LineSections());
-        이호선.addSection(new LineSection(이호선, 교대역, 강남역, 10L));
         Line 신분당선 = new Line("신분당선", "bg-green-600", new LineSections());
-        신분당선.addSection(new LineSection(신분당선, 강남역, 양재역, 10L));
         Line 삼호선 = new Line("삼호선", "bg-orange-600", new LineSections());
+
+        이호선.addSection(new LineSection(이호선, 교대역, 강남역, 10L));
+        신분당선.addSection(new LineSection(신분당선, 강남역, 양재역, 10L));
         삼호선.addSection(new LineSection(삼호선, 교대역, 남부터미널역, 2L));
         삼호선.addSection(new LineSection(삼호선, 남부터미널역, 양재역, 10L));
+
         lines = Arrays.asList(이호선, 신분당선, 삼호선);
 
         sourceId = 교대역_id;
@@ -129,5 +132,24 @@ public class PathServiceMockTest {
         assertThatThrownBy(() -> pathService.findShortestPath(sourceId, nonExistentTargetId))
             .isInstanceOf(StationNotFoundException.class)
             .hasMessageContaining(String.valueOf(nonExistentTargetId));
+    }
+
+    @Test
+    @DisplayName("출발역과 도착역 사이에 경로가 없으면 PathNotFoundException을 던진다")
+    void it_throws_PathNotFoundException_when_no_path_between_stations() {
+        // given
+        Station disconnectedStation = new Station("공덕역");
+        Long disconnectedStation_id = 5L;
+
+        when(stationRepository.findByIdOrThrow(sourceId)).thenReturn(교대역);
+        when(stationRepository.findByIdOrThrow(disconnectedStation_id)).thenReturn(
+            disconnectedStation);
+        when(lineRepository.findAll()).thenReturn(lines);
+        when(pathFinder.find(lines, 교대역, disconnectedStation))
+            .thenThrow(new PathNotFoundException());
+
+        // when, then
+        assertThatThrownBy(() -> pathService.findShortestPath(sourceId, disconnectedStation_id))
+            .isInstanceOf(PathNotFoundException.class);
     }
 }
