@@ -1,16 +1,15 @@
 package nextstep.subway.unit;
 
-import static nextstep.subway.acceptance.station.StationUtils.교대역;
-import static nextstep.subway.acceptance.station.StationUtils.신사역;
-import static nextstep.subway.acceptance.station.StationUtils.양재역;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
+import nextstep.subway.acceptance.station.StationUtils;
 import nextstep.subway.line.domain.LineRepository;
 import nextstep.subway.line.domain.entity.Line;
+import nextstep.subway.line.domain.entity.LineSection;
 import nextstep.subway.line.domain.entity.LineSections;
 import nextstep.subway.path.application.PathFinder;
 import nextstep.subway.path.application.PathService;
@@ -42,19 +41,41 @@ public class PathServiceMockTest {
     @InjectMocks
     private PathService pathService;
 
-    private Station source;
-    private Station target;
-    private Long sourceId = 1L;
-    private Long targetId = 2L;
+    private Station 교대역;
+    private Station 강남역;
+    private Station 양재역;
+    private Station 남부터미널역;
     private List<Line> lines;
+    private Long 교대역_id = 1L;
+    private Long 강남역_id = 2L;
+    private Long 양재역_id = 3L;
+    private Long 남부터미널역_id = 4L;
+    private Long sourceId;
+    private Long targetId;
+
+
+    /**
+     * 교대역    --- *2호선* ---   강남역 |                        | *3호선*                   *신분당선* | |
+     * 남부터미널역  --- *3호선* ---   양재
+     */
 
     @BeforeEach
     void setUp() {
-        source = new Station(교대역);
-        target = new Station(양재역);
+        교대역 = new Station("교대역");
+        강남역 = new Station("강남역");
+        양재역 = new Station("양재역");
+        남부터미널역 = new Station("남부터미널역");
         Line 이호선 = new Line("이호선", "bg-red-600", new LineSections());
+        이호선.addSection(new LineSection(이호선, 교대역, 강남역, 10L));
         Line 신분당선 = new Line("신분당선", "bg-green-600", new LineSections());
-        lines = Arrays.asList(이호선, 신분당선);
+        신분당선.addSection(new LineSection(신분당선, 강남역, 양재역, 10L));
+        Line 삼호선 = new Line("삼호선", "bg-orange-600", new LineSections());
+        삼호선.addSection(new LineSection(삼호선, 교대역, 남부터미널역, 2L));
+        삼호선.addSection(new LineSection(삼호선, 남부터미널역, 양재역, 10L));
+        lines = Arrays.asList(이호선, 신분당선, 삼호선);
+
+        sourceId = 교대역_id;
+        targetId = 양재역_id;
     }
 
     @Test
@@ -62,20 +83,21 @@ public class PathServiceMockTest {
     void it_returns_shortest_path() {
         // given
         PathResponse expectedPathResponse = new PathResponse(
-            Arrays.asList(new StationResponse(sourceId, source.getName()),
-                new StationResponse(targetId, target.getName())), 10L);
+            Arrays.asList(new StationResponse(교대역_id, 교대역.getName()),
+                new StationResponse(남부터미널역_id, 남부터미널역.getName()),
+                new StationResponse(양재역_id, 양재역.getName())), 12L);
 
-        when(stationRepository.findByIdOrThrow(sourceId)).thenReturn(source);
-        when(stationRepository.findByIdOrThrow(targetId)).thenReturn(target);
+        when(stationRepository.findByIdOrThrow(sourceId)).thenReturn(교대역);
+        when(stationRepository.findByIdOrThrow(targetId)).thenReturn(양재역);
         when(lineRepository.findAll()).thenReturn(lines);
-        when(pathFinder.find(lines, source, target)).thenReturn(expectedPathResponse);
+        when(pathFinder.find(lines, 교대역, 양재역)).thenReturn(expectedPathResponse);
 
         // when
         PathResponse actualPathResponse = pathService.findShortestPath(sourceId, targetId);
 
         // then
         assertThat(actualPathResponse).isEqualTo(expectedPathResponse);
-        assertThat(actualPathResponse.getDistance()).isEqualTo(10);
+        assertThat(actualPathResponse.getDistance()).isEqualTo(expectedPathResponse.getDistance());
     }
 
     @Test
@@ -99,7 +121,7 @@ public class PathServiceMockTest {
         // given
         Long nonExistentTargetId = 999L;
 
-        when(stationRepository.findByIdOrThrow(sourceId)).thenReturn(source);
+        when(stationRepository.findByIdOrThrow(sourceId)).thenReturn(교대역);
         when(stationRepository.findByIdOrThrow(nonExistentTargetId))
             .thenThrow(new StationNotFoundException(nonExistentTargetId));
 
@@ -108,5 +130,4 @@ public class PathServiceMockTest {
             .isInstanceOf(StationNotFoundException.class)
             .hasMessageContaining(String.valueOf(nonExistentTargetId));
     }
-
 }
