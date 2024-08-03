@@ -90,6 +90,36 @@ public class LineSectionsTest {
     class DeleteSection {
 
         @Test
+        @DisplayName("상행 종점역을 삭제한다")
+        void deleteFirstStation() {
+            // given
+            lineSections.addSection(new LineSection(신분당선, 신사역, 논현역, 10L));
+            lineSections.addSection(new LineSection(신분당선, 논현역, 신논현역, 5L));
+
+            // when
+            lineSections.deleteSection(신사역);
+
+            // then
+            assertThat(lineSections.size()).isEqualTo(1);
+            assertThat(lineSections.getStations()).containsExactly(논현역, 신논현역);
+        }
+
+        @Test
+        @DisplayName("하행 종점역을 삭제한다")
+        void deleteLastStation() {
+            // given
+            lineSections.addSection(new LineSection(신분당선, 신사역, 논현역, 10L));
+            lineSections.addSection(new LineSection(신분당선, 논현역, 신논현역, 5L));
+
+            // when
+            lineSections.deleteSection(신논현역);
+
+            // then
+            assertThat(lineSections.size()).isEqualTo(1);
+            assertThat(lineSections.getStations()).containsExactly(신사역, 논현역);
+        }
+
+        @Test
         @DisplayName("중간 역을 삭제한다")
         void deleteMiddleStation() {
             // given
