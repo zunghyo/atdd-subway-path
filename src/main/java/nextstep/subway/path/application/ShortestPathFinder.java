@@ -33,7 +33,7 @@ public class ShortestPathFinder implements PathFinder {
     }
 
     private static void validateSourceAndTargetStations(Station source, Station target) {
-        if (source.getId().equals(target.getId())) {
+        if (source.equals(target)) {
             throw new SubwayException(SubwayExceptionType.SOURCE_AND_TARGET_SAME);
         }
     }
