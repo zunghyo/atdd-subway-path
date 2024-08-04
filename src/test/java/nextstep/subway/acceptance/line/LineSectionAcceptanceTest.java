@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import nextstep.subway.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,9 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 
 @DisplayName("구간 관리 기능")
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class LineSectionAcceptanceTest {
+public class LineSectionAcceptanceTest extends AcceptanceTest {
 
     private Long 신사역_id;
     private Long 논현역_id;
@@ -28,6 +27,8 @@ public class LineSectionAcceptanceTest {
 
     @BeforeEach
     public void setUp() {
+        super.setUp();
+
         신사역_id = 지하철역_생성_후_id_추출(신사역);
         논현역_id = 지하철역_생성_후_id_추출(논현역);
         신논현역_id = 지하철역_생성_후_id_추출(신논현역);

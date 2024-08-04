@@ -1,6 +1,5 @@
 package nextstep.subway.acceptance.line;
 
-import static nextstep.subway.acceptance.common.SubwayUtils.responseToId;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToLocation;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToName;
 import static nextstep.subway.acceptance.common.SubwayUtils.responseToNames;
@@ -11,18 +10,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.List;
+import nextstep.subway.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
 
 @DisplayName("노선 관리 기능")
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class LineAcceptanceTest {
+public class LineAcceptanceTest extends AcceptanceTest {
 
     private Long 신사역_id;
     private Long 논현역_id;
@@ -31,6 +26,8 @@ public class LineAcceptanceTest {
 
     @BeforeEach
     public void setUp() {
+        super.setUp();
+
         신사역_id = 지하철역_생성_후_id_추출(신사역);
         논현역_id = 지하철역_생성_후_id_추출(논현역);
         강남역_id = 지하철역_생성_후_id_추출(강남역);

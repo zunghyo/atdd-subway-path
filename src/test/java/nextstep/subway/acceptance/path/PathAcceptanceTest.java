@@ -9,18 +9,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.util.List;
+import nextstep.subway.acceptance.AcceptanceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.annotation.DirtiesContext;
 
 @DisplayName("경로 조회 기능")
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class PathAcceptanceTest {
+public class PathAcceptanceTest extends AcceptanceTest {
 
     private Long 교대역_id;
     private Long 강남역_id;
@@ -31,15 +27,13 @@ public class PathAcceptanceTest {
     private Long 삼호선_id;
 
     /**
-     * 교대역    --- *2호선* ---   강남역
-     * |                        |
-     * *3호선*                   *신분당선*
-     * |                        |
-     * 남부터미널역  --- *3호선* ---   양재
+     * 교대역    --- *2호선* ---   강남역 |                        | *3호선*                   *신분당선* |
+     * | 남부터미널역  --- *3호선* ---   양재
      */
 
     @BeforeEach
     public void setUp() {
+        super.setUp();
 
         교대역_id = 지하철역_생성_후_id_추출(교대역);
         강남역_id = 지하철역_생성_후_id_추출(강남역);
